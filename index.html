@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Feedback Collection</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link id="favicon" rel="icon" href="assets/images/favicon.png" type="image/x-icon">
+</head>
+
+<body>
+    <div class="page-container">
+        <header class="header">
+            <a href="https://u444.vn">
+                <img src="assets/images/logo.png" alt="Logo" id="logo" />
+            </a>
+            <p class="title">Feedback Collection</p>
+        </header>
+
+        <main class="main">
+            <div class="controls">
+                <div>
+                    <button id="sort-newest">Sort: Newest First</button>
+                    <button id="sort-oldest">Sort: Oldest First</button>
+                </div>
+                <button id="export-btn">Export Table</button>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Day</th>
+                        <th>Experience</th>
+                        <th>Flavor</th>
+                        <th>Suggestion</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+
+            <div class="pagination">
+                <button id="prev-page">← Prev</button>
+                <span id="page-info">Page 1</span>
+                <button id="next-page">Next →</button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:8080/api";
+
+        const tableBody = document.getElementById("table-body");
+        const pageInfo = document.getElementById("page-info");
+        const rowsPerPage = 20;
+
+        let users = [];
+        let currentPage = 1;
+
+        async function fetchUsers() {
+            try {
+                const response = await axios.get(`${API_URL}/feedback`);
+                users = response.data.reverse(); // Default: newest first
+                renderTable();
+            } catch (err) {
+                console.error("Error fetching data:", err);
+            }
+        }
+        function convertRate(value) {
+            const num = parseInt(String(value).trim());
+            switch (num) {
+                case 1: return "Bad (Tệ)";
+                case 2: return "Not Good (Không tốt)";
+                case 3: return "Okay (Ổn)";
+                case 4: return "Good (Tốt)";
+                case 5: return "Wow (Tuyệt)";
+                default: return "Không rõ";
+            }
+        }
+
+
+        function renderTable() {
+            tableBody.innerHTML = "";
+            const start = (currentPage - 1) * rowsPerPage;
+            const paginatedUsers = users.slice(start, start + rowsPerPage);
+
+            paginatedUsers.forEach(user => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                        <td>${new Date(user.date).toLocaleString()}</td>
+                        <td>${convertRate(user.experience)}</td>
+                        <td>${convertRate(user.flavor)}</td>
+                        <td>${user.suggestion && user.suggestion.trim() !== '' ? user.suggestion : 'None'}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            const totalPages = Math.ceil(users.length / rowsPerPage);
+            pageInfo.innerText = `Page ${currentPage} of ${totalPages}`;
+        }
+
+        // Pagination handlers
+        document.getElementById("prev-page").addEventListener("click", () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+            }
+        });
+
+        document.getElementById("next-page").addEventListener("click", () => {
+            if (currentPage < Math.ceil(users.length / rowsPerPage)) {
+                currentPage++;
+                renderTable();
+            }
+        });
+
+        // Sorting
+        document.getElementById("sort-newest").addEventListener("click", () => {
+            users.sort((a, b) => new Date(b.createAt) - new Date(a.createAt));
+            currentPage = 1;
+            renderTable();
+        });
+
+        document.getElementById("sort-oldest").addEventListener("click", () => {
+            users.sort((a, b) => new Date(a.createAt) - new Date(b.createAt));
+            currentPage = 1;
+            renderTable();
+        });
+
+        // Export table to CSV
+        document.getElementById("export-btn").addEventListener("click", () => {
+            const rows = [["Day", "Experience", "Flavor", "Suggestion"]];
+            users.forEach(user => {
+                rows.push([
+                    new Date(user.createAt).toLocaleString(),
+                    convertRate(user.experience),
+                    convertRate(user.flavor),
+                    user.suggestion && user.suggestion.trim() !== '' ? user.suggestion : 'None',                ]);
+            });
+
+            const csvContent = rows.map(e => e.join(",")).join("\n");
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "feedback_customers.csv";
+            link.click();
+        });
+
+        fetchUsers();
+    </script>
+</body>
+
+</html>
