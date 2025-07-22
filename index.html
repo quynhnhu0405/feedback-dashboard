@@ -131,7 +131,7 @@
 
         // Export table to CSV
         document.getElementById("export-btn").addEventListener("click", () => {
-            const rows = [["Day","Hour", "Experience", "Flavor", "Suggestion"]];
+            const rows = [["Day", "Experience", "Flavor", "Suggestion"]];
             users.forEach(user => {
                 rows.push([
                     new Date(user.date).toLocaleString(),
