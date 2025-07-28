@@ -33,11 +33,8 @@
                 <thead>
                     <tr>
                         <th style="width: 10%;">Day</th>
-                        <th style="width: 10%;">Table</th>
                         <th style="width: 10%;">Experience</th>
                         <th style="width: 10%;">Flavor</th>
-                        <th style="width: 30%;">Suggestion</th>
-                        <th style="width: 30%;">Note</th>
                     </tr>
                 </thead>
                 <tbody id="table-body"></tbody>
@@ -104,57 +101,13 @@
                 row.innerHTML = `
             <td>${new Date(user.date).toLocaleString()
                     }</td>
-            <td>${user.tableNumber
-                    }</td>
             <td>${convertRate(user.experience)
                     }</td>
             <td>${convertRate(user.flavor)
                     }</td>
-            <td>${user.suggestion && user.suggestion.trim() !== '' ? user.suggestion : 'None'
-                    }</td>
-            <td>
-                <span id="note-display-${uniqueIdx}">${noteValue || 'None'}</span>
-                <textarea id="note-input-${uniqueIdx}" style="display: none;">${noteValue.replace(/</g, "&lt;").replace(/>/g, "&gt;") }</textarea><br>
-                <button class="edit-note-btn" data-user-idx="${uniqueIdx}">Edit</button>
-                <button class="update-note-btn" data-user-idx="${uniqueIdx}" style="display: none;" ${userId ? '' : 'disabled'
-                    }>Update</button>
-            </td>
 
         `;
                 tableBody.appendChild(row);
-            });
-
-            document.querySelectorAll('.edit-note-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const userIdx = btn.getAttribute('data-user-idx');
-                    document.getElementById(`note-display-${userIdx}`).style.display = 'none';
-                    document.getElementById(`note-input-${userIdx}`).style.display = 'inline-block';
-                    btn.style.display = 'none';
-                    document.querySelector(`.update-note-btn[data-user-idx="${userIdx}"]`).style.display = 'inline-block';
-                });
-            });
-
-            document.querySelectorAll('.update-note-btn').forEach(btn => {
-                btn.addEventListener('click', async () => {
-                    const userIdx = parseInt(btn.getAttribute('data-user-idx'));
-                    const user = users[userIdx];
-                    const userId = user._id || user.id;
-                    if (!userId) {
-                        alert('Cannot update note: missing user id.');
-                        return;
-                    }
-
-                    const input = document.getElementById(`note-input-${userIdx}`);
-                    const newNote = input.value;
-                    try {
-                        await axios.put(`${API_URL}/feedback/${userId}/note`, { note: newNote });
-                        users[userIdx].note = newNote;
-                        renderTable();
-                    } catch (err) {
-                        alert('Failed to update note.');
-                        console.error(err);
-                    }
-                });
             });
 
             const totalPages = Math.ceil(users.length / rowsPerPage);
@@ -203,17 +156,13 @@
             const rows = [[
                 "Day",
                 "Experience",
-                "Flavor",
-                "Suggestion",
-                "Note"
+                "Flavor"
             ]];
             users.forEach(user => {
                 rows.push([
                     new Date(user.date).toLocaleString(),
                     convertRate(user.experience),
-                    convertRate(user.flavor),
-                    user.suggestion && user.suggestion.trim() !== '' ? user.suggestion : 'None',
-                    user.note ? user.note : ''
+                    convertRate(user.flavor)
                 ]);
             });
 
