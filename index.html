@@ -33,8 +33,8 @@
                 <thead>
                     <tr>
                         <th style="width: 10%;">Day</th>
-                        <th style="width: 10%;">Experience</th>
-                        <th style="width: 10%;">Flavor</th>
+                        <th style="width: 10%;">Service</th>
+                        <th style="width: 10%;">Cuisine Prepared</th>
                     </tr>
                 </thead>
                 <tbody id="table-body"></tbody>
@@ -155,8 +155,8 @@
         document.getElementById("export-btn").addEventListener("click", () => {
             const rows = [[
                 "Day",
-                "Experience",
-                "Flavor"
+                "Service",
+                "Cuisine Prepared"
             ]];
             users.forEach(user => {
                 rows.push([
