@@ -33,6 +33,7 @@
                 <thead>
                     <tr>
                         <th style="width: 10%;">Day</th>
+                        <th style="width: 10%;">Table Number</th>
                         <th style="width: 10%;">Service</th>
                         <th style="width: 10%;">Cuisine Prepared</th>
                     </tr>
@@ -101,6 +102,8 @@
                 row.innerHTML = `
             <td>${new Date(user.date).toLocaleString()
                     }</td>
+            <td>${user.tableNumber
+                    }</td>
             <td>${convertRate(user.experience)
                     }</td>
             <td>${convertRate(user.flavor)
@@ -155,12 +158,14 @@
         document.getElementById("export-btn").addEventListener("click", () => {
             const rows = [[
                 "Day",
+                "Table Number",
                 "Service",
                 "Cuisine Prepared"
             ]];
             users.forEach(user => {
                 rows.push([
                     new Date(user.date).toLocaleString(),
+                    user.tableNumber,
                     convertRate(user.experience),
                     convertRate(user.flavor)
                 ]);
